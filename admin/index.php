@@ -51,7 +51,18 @@ try {
     ")->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $error = 'Database error: ' . $e->getMessage();
+    // Provide more specific error messages
+    if ($e->getCode() == 1049) {
+        $error = "Database '$dbname' not found. Please check your database configuration.";
+    } elseif ($e->getCode() == 1045) {
+        $error = "Access denied for user '$username'. Invalid database credentials.";
+    } elseif ($e->getCode() == 2002) {
+        $error = "Cannot connect to database server at '$host'. Server might be down or unreachable.";
+    } elseif ($e->getCode() == '42S02') {
+        $error = "Table not found. Please run the database setup script first.";
+    } else {
+        $error = 'Database error: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -85,6 +96,7 @@ try {
                     <a href="subscription_management.php" class="text-gray-300 hover:text-white transition-colors duration-200">Subscriptions</a>
                     <a href="anime_management.php" class="text-gray-300 hover:text-white transition-colors duration-200">Anime Management</a>
                     <a href="coupons.php" class="text-gray-300 hover:text-white transition-colors duration-200">Coupons</a>
+                    <a href="db_status.php" class="text-gray-300 hover:text-white transition-colors duration-200">DB Status</a>
                 </div>
             </div>
             <div class="flex items-center space-x-4">

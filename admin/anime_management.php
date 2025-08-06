@@ -74,7 +74,20 @@ if (isset($_POST['action'])) {
                 break;
         }
     } catch (PDOException $e) {
-        $_SESSION['error'] = 'Database error: ' . $e->getMessage();
+        // Provide more specific error messages
+        if ($e->getCode() == 1049) {
+            $_SESSION['error'] = "Database '$dbname' not found. Please check your database configuration.";
+        } elseif ($e->getCode() == 1045) {
+            $_SESSION['error'] = "Access denied for user '$username'. Invalid database credentials.";
+        } elseif ($e->getCode() == 2002) {
+            $_SESSION['error'] = "Cannot connect to database server at '$host'. Server might be down or unreachable.";
+        } elseif ($e->getCode() == '42S02') {
+            $_SESSION['error'] = "Table not found. Please run the database setup script first.";
+        } elseif ($e->getCode() == '23000') {
+            $_SESSION['error'] = "Duplicate entry or foreign key constraint violation. Check your input data.";
+        } else {
+            $_SESSION['error'] = 'Database error: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')';
+        }
     } catch (Exception $e) {
         $_SESSION['error'] = 'Error: ' . $e->getMessage();
     }
@@ -285,7 +298,18 @@ if (isset($_POST['action'])) {
                             echo '</tr>';
                         }
                     } catch (PDOException $e) {
-                        echo '<tr><td colspan="7" class="text-red-500">Error loading anime data: ' . $e->getMessage() . '</td></tr>';
+                        // Provide more specific error messages
+                        if ($e->getCode() == 1049) {
+                            echo '<tr><td colspan="7" class="text-red-500">Database not found: ' . htmlspecialchars($dbname) . '. Please check configuration.</td></tr>';
+                        } elseif ($e->getCode() == 1045) {
+                            echo '<tr><td colspan="7" class="text-red-500">Access denied. Invalid database credentials.</td></tr>';
+                        } elseif ($e->getCode() == 2002) {
+                            echo '<tr><td colspan="7" class="text-red-500">Cannot connect to database server at ' . htmlspecialchars($host) . '.</td></tr>';
+                        } elseif ($e->getCode() == '42S02') {
+                            echo '<tr><td colspan="7" class="text-red-500">Table "anime" not found. Please run the database setup script first.</td></tr>';
+                        } else {
+                            echo '<tr><td colspan="7" class="text-red-500">Database error: ' . htmlspecialchars($e->getMessage()) . ' (Code: ' . $e->getCode() . ')</td></tr>';
+                        }
                     }
                     ?>
                 </tbody>

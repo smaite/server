@@ -47,7 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Invalid username or password';
             }
         } catch (PDOException $e) {
-            $error = 'Database connection failed. Please try again later.';
+            // Provide more specific error messages
+            if ($e->getCode() == 1049) {
+                $error = "Database '$dbname' not found. Please check your database configuration.";
+            } elseif ($e->getCode() == 1045) {
+                $error = "Access denied for user '$username'. Invalid database credentials.";
+            } elseif ($e->getCode() == 2002) {
+                $error = "Cannot connect to database server at '$host'. Server might be down or unreachable.";
+            } else {
+                $error = 'Database connection error: ' . $e->getMessage();
+            }
         }
     }
 }
