@@ -263,7 +263,7 @@ if (isset($_POST['action'])) {
                         $stmt->execute();
                         
                         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                            echo '<tr>';
+                            echo '<tr class="bg-gray-800">';
                             echo '<td>' . htmlspecialchars($row['id']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['title']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['genres']) . '</td>';
