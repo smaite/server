@@ -245,7 +245,7 @@ if (isset($_POST['action'])) {
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-gray-800">
                     <?php
                     try {
                         // Connect to database
