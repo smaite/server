@@ -294,7 +294,7 @@ if (isset($_POST['action'])) {
                             SELECT a.id, a.title, a.genres, a.release_year, a.status, COUNT(s.id) as seasons_count
                             FROM anime a
                             LEFT JOIN seasons s ON a.id = s.anime_id
-                            GROUP BY a.id
+                            GROUP BY a.id, a.title, a.genres, a.release_year, a.status
                             ORDER BY a.title
                         ");
                         $stmt->execute();
