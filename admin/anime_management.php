@@ -168,6 +168,43 @@ if (isset($_POST['action'])) {
             border: 1px solid #7c3aed;
             background: rgba(124, 58, 237, 0.5) !important;
         }
+        
+        /* Fix for white background in tables */
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: #121212;
+        }
+        
+        table.dataTable.stripe tbody tr.even,
+        table.dataTable.display tbody tr.even {
+            background-color: #1a1a1a;
+        }
+        
+        table.dataTable.hover tbody tr:hover,
+        table.dataTable.display tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+        
+        /* Fix for white background in sorting columns */
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc {
+            background-color: #121212;
+        }
+        
+        /* Fix for any other white elements */
+        .bg-white {
+            background-color: #121212 !important;
+        }
+        
+        /* Fix for odd/even rows */
+        .odd {
+            background-color: #121212 !important;
+        }
+        
+        .even {
+            background-color: #1a1a1a !important;
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
