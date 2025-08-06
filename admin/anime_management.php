@@ -598,7 +598,13 @@ if (isset($_POST['action'])) {
             $('#animeTable').DataTable({
                 order: [[1, 'asc']],
                 pageLength: 10,
-                lengthMenu: [10, 25, 50, 100]
+                lengthMenu: [10, 25, 50, 100],
+                // Dark theme customization
+                "stripeClasses": ['odd', 'even'],
+                "rowCallback": function(row, data, index) {
+                    $(row).removeClass('odd even');
+                    $(row).addClass(index % 2 === 0 ? 'odd' : 'even');
+                }
             });
             
             // Handle anime selection change for episodes
