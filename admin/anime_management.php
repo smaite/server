@@ -282,8 +282,7 @@ if (isset($_POST['action'])) {
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-gray-800">
-                    <tr class="bg-gray-800">
+                <tbody>
                     <?php
                     try {
                         // Connect to database
@@ -301,6 +300,7 @@ if (isset($_POST['action'])) {
                         $stmt->execute();
                         
                         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<tr class="bg-gray-800">';
                             echo '<td>' . htmlspecialchars($row['id']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['title']) . '</td>';
                             echo '<td>' . htmlspecialchars($row['genres']) . '</td>';
