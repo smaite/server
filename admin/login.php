@@ -144,6 +144,10 @@ try {
                 <?php if ($error): ?>
                     <div class="bg-red-900 border border-red-700 text-white px-4 py-3 rounded mb-6">
                         <?php echo htmlspecialchars($error); ?>
+                        <?php if (strpos($error, 'Access denied') !== false || strpos($error, 'Database') !== false): ?>
+                            <p class="mt-2 text-sm">Need to create a new admin account? <a href="register_admin.php?key=animeelite_setup2023" class="text-primary-400 hover:underline">Register here</a></p>
+                            <p class="mt-1 text-sm">Or check <a href="db_status.php?setup=initial" class="text-primary-400 hover:underline">database status</a> for troubleshooting.</p>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
                 
