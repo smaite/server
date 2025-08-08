@@ -590,6 +590,96 @@ if (isset($_POST['action'])) {
         </div>
     </div>
     
+    <!-- Edit Episode Modal -->
+    <div id="edit-episode-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Edit Episode</h3>
+                <button onclick="document.getElementById('edit-episode-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="edit-episode-form">
+                <input type="hidden" name="episode_id" id="edit-episode-id">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Episode Number</label>
+                    <input type="number" name="episode_number" id="edit-episode-number" required min="1" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Title</label>
+                    <input type="text" name="title" id="edit-episode-title" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Description</label>
+                    <textarea name="description" id="edit-episode-description" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" rows="3"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Thumbnail URL</label>
+                    <input type="text" name="thumbnail" id="edit-episode-thumbnail" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Video URL (iframe)</label>
+                    <input type="text" name="video_url" id="edit-episode-video-url" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Duration (minutes)</label>
+                    <input type="number" name="duration" id="edit-episode-duration" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="is_premium" id="edit-episode-premium" class="h-4 w-4 bg-gray-800 border-gray-700 rounded text-primary-600">
+                        <label for="edit-episode-premium" class="ml-2 block text-gray-300">Premium Only</label>
+                    </div>
+                </div>
+                
+                <div id="edit-episode-message" class="mb-4 hidden rounded-md p-3"></div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary px-6 py-2">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirmation-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Confirm Delete</h3>
+                <button onclick="document.getElementById('delete-confirmation-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-gray-300" id="delete-confirmation-text">Are you sure you want to delete this episode?</p>
+            </div>
+            
+            <div class="flex justify-end space-x-2">
+                <button onclick="document.getElementById('delete-confirmation-modal').classList.add('hidden')" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                    Cancel
+                </button>
+                <button id="confirm-delete-button" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
@@ -638,12 +728,72 @@ if (isset($_POST['action'])) {
                     }
                 });
             });
+            
+            // Handle edit episode form submission
+            $('#edit-episode-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const isPremium = $('#edit-episode-premium').is(':checked');
+                
+                // Add is_premium if checked
+                if (isPremium) {
+                    formData.append('is_premium', '1');
+                }
+                
+                // Show loading state
+                const submitButton = $(this).find('button[type="submit"]');
+                const originalText = submitButton.text();
+                submitButton.prop('disabled', true).text('Saving...');
+                
+                // Clear previous messages
+                $('#edit-episode-message').removeClass('bg-green-800 bg-red-800').addClass('hidden').text('');
+                
+                $.ajax({
+                    url: 'ajax/edit_episode.php',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#edit-episode-message').removeClass('hidden').addClass('bg-green-800').text(response.message);
+                            
+                            // Refresh the seasons/episodes view after a short delay
+                            setTimeout(function() {
+                                // Get the current anime ID from the URL or data attribute
+                                const animeId = $('#seasons-container').data('anime-id');
+                                if (animeId) {
+                                    viewSeasons(animeId);
+                                }
+                                
+                                // Hide the modal
+                                setTimeout(function() {
+                                    document.getElementById('edit-episode-modal').classList.add('hidden');
+                                }, 500);
+                            }, 1000);
+                        } else {
+                            $('#edit-episode-message').removeClass('hidden').addClass('bg-red-800').text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $('#edit-episode-message').removeClass('hidden').addClass('bg-red-800').text('Error processing request');
+                    },
+                    complete: function() {
+                        // Restore button state
+                        submitButton.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
         });
         
         // View seasons and episodes for an anime
         function viewSeasons(animeId) {
             const container = document.getElementById('seasons-container');
             const content = document.getElementById('seasons-content');
+            
+            // Store anime ID for reference
+            container.dataset.animeId = animeId;
             
             container.classList.remove('hidden');
             content.innerHTML = `<div class="flex justify-center items-center h-32">
@@ -672,6 +822,137 @@ if (isset($_POST['action'])) {
             alert('Edit functionality will be implemented here for anime ID: ' + animeId);
             // This would be expanded to load the anime data and show an edit form
         }
+        
+        // Edit episode
+        function editEpisode(episodeId) {
+            // Clear previous form data and messages
+            document.getElementById('edit-episode-form').reset();
+            document.getElementById('edit-episode-message').classList.add('hidden');
+            
+            // Set the episode ID in the form
+            document.getElementById('edit-episode-id').value = episodeId;
+            
+            // Show loading state
+            document.getElementById('edit-episode-modal').classList.remove('hidden');
+            
+            // Fetch episode details
+            fetch(`ajax/edit_episode.php?episode_id=${episodeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.episode) {
+                        const episode = data.episode;
+                        
+                        // Populate form fields
+                        document.getElementById('edit-episode-number').value = episode.episode_number;
+                        document.getElementById('edit-episode-title').value = episode.title;
+                        document.getElementById('edit-episode-description').value = episode.description || '';
+                        document.getElementById('edit-episode-thumbnail').value = episode.thumbnail || '';
+                        document.getElementById('edit-episode-video-url').value = episode.video_url;
+                        document.getElementById('edit-episode-duration').value = episode.duration || '';
+                        document.getElementById('edit-episode-premium').checked = episode.is_premium == 1;
+                    } else {
+                        document.getElementById('edit-episode-message').classList.remove('hidden').classList.add('bg-red-800');
+                        document.getElementById('edit-episode-message').textContent = data.message || 'Failed to load episode details';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('edit-episode-message').classList.remove('hidden').classList.add('bg-red-800');
+                    document.getElementById('edit-episode-message').textContent = 'Error loading episode details';
+                });
+        }
+        
+        // Delete episode
+        let episodeToDelete = null;
+        
+        function deleteEpisode(episodeId, episodeTitle) {
+            // Store the episode ID for deletion
+            episodeToDelete = episodeId;
+            
+            // Set confirmation text
+            document.getElementById('delete-confirmation-text').textContent = 
+                `Are you sure you want to delete episode "${episodeTitle}"?`;
+            
+            // Show confirmation modal
+            document.getElementById('delete-confirmation-modal').classList.remove('hidden');
+        }
+        
+        // Set up delete confirmation button
+        document.getElementById('confirm-delete-button').addEventListener('click', function() {
+            if (episodeToDelete) {
+                // Change button text and disable
+                this.disabled = true;
+                this.textContent = 'Deleting...';
+                
+                // Send delete request
+                fetch('ajax/delete_episode.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `episode_id=${episodeToDelete}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide confirmation modal
+                    document.getElementById('delete-confirmation-modal').classList.add('hidden');
+                    
+                    // Show result message
+                    if (data.success) {
+                        // Create temporary message element
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'fixed top-4 right-4 bg-green-800 text-white px-4 py-3 rounded shadow-lg z-50';
+                        messageElement.textContent = data.message;
+                        document.body.appendChild(messageElement);
+                        
+                        // Remove after a few seconds
+                        setTimeout(() => {
+                            messageElement.remove();
+                        }, 3000);
+                        
+                        // Refresh the seasons/episodes view
+                        const animeId = document.getElementById('seasons-container').dataset.animeId;
+                        if (animeId) {
+                            viewSeasons(animeId);
+                        }
+                    } else {
+                        // Create error message element
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'fixed top-4 right-4 bg-red-800 text-white px-4 py-3 rounded shadow-lg z-50';
+                        messageElement.textContent = data.message || 'Failed to delete episode';
+                        document.body.appendChild(messageElement);
+                        
+                        // Remove after a few seconds
+                        setTimeout(() => {
+                            messageElement.remove();
+                        }, 5000);
+                    }
+                })
+                .catch(error => {
+                    // Handle network errors
+                    document.getElementById('delete-confirmation-modal').classList.add('hidden');
+                    
+                    // Create error message element
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'fixed top-4 right-4 bg-red-800 text-white px-4 py-3 rounded shadow-lg z-50';
+                    messageElement.textContent = 'Network error occurred while deleting episode';
+                    document.body.appendChild(messageElement);
+                    
+                    // Remove after a few seconds
+                    setTimeout(() => {
+                        messageElement.remove();
+                    }, 5000);
+                })
+                .finally(() => {
+                    // Reset button
+                    const button = document.getElementById('confirm-delete-button');
+                    button.disabled = false;
+                    button.textContent = 'Delete';
+                    
+                    // Reset episodeToDelete
+                    episodeToDelete = null;
+                });
+            }
+        });
     </script>
 </body>
 </html> 

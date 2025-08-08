@@ -115,8 +115,10 @@ try {
                     }
                     echo '</td>';
                     echo '<td class="px-4 py-3 text-right">';
-                    echo '<button class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded mr-1">Edit</button>';
-                    echo '<button class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">Delete</button>';
+                    echo '<button class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded mr-1" 
+                          onclick="editEpisode(' . $episode['id'] . ')">Edit</button>';
+                    echo '<button class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                          onclick="deleteEpisode(' . $episode['id'] . ', \'' . addslashes($episode['title']) . '\')">Delete</button>';
                     echo '</td>';
                     echo '</tr>';
                 }
